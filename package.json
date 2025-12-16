@@ -22,7 +22,9 @@
     "@radix-ui/react-tooltip": "1.0.7",
     "uuid": "^13.0.0",
     "@tanstack/react-table": "8.13.2",
-    "@google/genai": "^1.33.0"
+    "@google/genai": "^1.33.0",
+    "react-window": "1.8.10",
+    "react-virtualized-auto-sizer": "1.0.24"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

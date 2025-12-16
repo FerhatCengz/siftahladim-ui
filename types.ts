@@ -107,6 +107,7 @@ export interface Vehicle {
   // Media & Location
   images: string[];
   location: VehicleLocation;
+  coordinates?: Coordinates; // [YENİ] Geocoding sonucu
 
   tramer: number;
   insuranceExpiry?: string;

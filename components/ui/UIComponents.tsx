@@ -66,7 +66,7 @@ export const Switch: React.FC<SwitchProps> = ({ checked, onCheckedChange, classN
   );
 };
 
-// --- Drawer / Modal (Unified Component with Portal) ---
+// --- Drawer (Bottom Sheet for Mobile, Modal-like) ---
 export const Drawer = ({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title?: string; children?: React.ReactNode }) => {
   const [animate, setAnimate] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
@@ -91,10 +91,9 @@ export const Drawer = ({ isOpen, onClose, title, children }: { isOpen: boolean; 
 
   if (!shouldRender) return null;
 
-  // Portal target (document.body to ensure it covers everything including sidebar)
   const portalContent = (
-    <div className="fixed inset-0 z-[9999] flex justify-center items-end md:items-center">
-      {/* Backdrop with higher blur and dark overlay */}
+    <div className="fixed inset-0 z-[9999] flex justify-center items-end md:items-center pointer-events-auto">
+      {/* Backdrop */}
       <div 
         className={cn(
           "fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 ease-out",
@@ -108,7 +107,6 @@ export const Drawer = ({ isOpen, onClose, title, children }: { isOpen: boolean; 
       <div 
         className={cn(
           "relative bg-white w-full md:w-[550px] md:rounded-3xl rounded-t-[2rem] shadow-2xl transform transition-all duration-300 cubic-bezier(0.32, 0.72, 0, 1) flex flex-col max-h-[90dvh]",
-          // Animation states
           animate 
             ? "translate-y-0 opacity-100 scale-100" 
             : "translate-y-8 opacity-0 scale-95"
@@ -151,6 +149,71 @@ export const Drawer = ({ isOpen, onClose, title, children }: { isOpen: boolean; 
   return createPortal(portalContent, document.body);
 };
 
+// --- Dialog (Center Modal) ---
+export const Dialog = ({ isOpen, onClose, title, description, children, footer }: { isOpen: boolean; onClose: () => void; title?: string; description?: string; children?: React.ReactNode, footer?: React.ReactNode }) => {
+    const [animate, setAnimate] = useState(false);
+    const [shouldRender, setShouldRender] = useState(false);
+  
+    useEffect(() => {
+      if (isOpen) {
+        setShouldRender(true);
+        document.body.style.overflow = 'hidden';
+        requestAnimationFrame(() => requestAnimationFrame(() => setAnimate(true)));
+      } else {
+        setAnimate(false);
+        const timer = setTimeout(() => {
+          setShouldRender(false);
+          document.body.style.overflow = 'unset';
+        }, 200);
+        return () => clearTimeout(timer);
+      }
+    }, [isOpen]);
+  
+    if (!shouldRender) return null;
+  
+    return createPortal(
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div 
+          className={cn(
+            "fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200 ease-out",
+            animate ? "opacity-100" : "opacity-0"
+          )}
+          onClick={onClose}
+        />
+        
+        {/* Modal Window */}
+        <div 
+          className={cn(
+            "relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 transform transition-all duration-200 scale-95 opacity-0",
+            animate && "scale-100 opacity-100"
+          )}
+        >
+            {title && <h3 className="text-lg font-bold text-slate-900 mb-2">{title}</h3>}
+            {description && <p className="text-sm text-slate-500 mb-4 leading-relaxed">{description}</p>}
+            
+            <div className="mt-2">
+                {children}
+            </div>
+
+            {footer && (
+                <div className="mt-6 flex justify-end gap-3 pt-2">
+                    {footer}
+                </div>
+            )}
+
+            <button 
+                onClick={onClose}
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors"
+            >
+                <X size={18} />
+            </button>
+        </div>
+      </div>,
+      document.body
+    );
+};
+
 // --- Advanced Tooltip ---
 interface TooltipProps {
   content: React.ReactNode;
@@ -173,7 +236,6 @@ export const Tooltip = ({ content, children, position = "top", className, delay 
     setIsVisible(false);
   };
 
-  // Position classes
   const positionClasses = {
     top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
     bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
@@ -203,7 +265,6 @@ export const Tooltip = ({ content, children, position = "top", className, delay 
             className
         )}>
           {content}
-          {/* Arrow */}
           <div className={cn("absolute border-4", arrowClasses[position])}></div>
         </div>
       )}
@@ -348,7 +409,6 @@ export const Combobox: React.FC<ComboboxProps> = ({ options, value, onChange, pl
   const [query, setQuery] = React.useState("");
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // Use Turkish-safe lowercase for filtering
   const filteredOptions = options.filter(opt => 
     turkishToLower(opt).includes(turkishToLower(query))
   );
@@ -372,7 +432,7 @@ export const Combobox: React.FC<ComboboxProps> = ({ options, value, onChange, pl
   const handleCreate = () => {
     if (onCreate && query) {
       onCreate(query);
-      onChange(query); // The parent should normalize this
+      onChange(query);
       setQuery("");
       setIsOpen(false);
     }
@@ -415,7 +475,6 @@ export const Combobox: React.FC<ComboboxProps> = ({ options, value, onChange, pl
             />
           </div>
           <div className="space-y-0.5">
-            {/* Show Create Option if no results found or if query doesn't match any option exactly */}
             {onCreate && query && !options.some(o => turkishToLower(o) === turkishToLower(query)) && (
               <div 
                 className="relative flex cursor-pointer select-none items-center rounded-xl px-3 py-3 text-sm font-semibold outline-none bg-slate-100 text-slate-900 hover:bg-slate-200 transition-colors"

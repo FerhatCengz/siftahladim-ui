@@ -7,6 +7,7 @@ import { Vehicle, VehicleStatus, FuelType, Transmission, ExpertiseReport, Vehicl
 import { CURRENT_USER_DEALER_ID } from '../constants';
 import { validateVehicleForm } from '../lib/validation';
 import { useImageUpload } from './useImageUpload';
+import { getCoordinatesFromAddress } from '../lib/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -73,7 +74,7 @@ export const useVehicleForm = () => {
   };
 
   // Form Gönderme
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Resimleri forma ekle
@@ -90,6 +91,20 @@ export const useVehicleForm = () => {
 
     setIsSubmitting(true);
 
+    // [YENİ] Adres verisinden koordinatları bul
+    let coordinates = undefined;
+    if (formData.location?.city && formData.location?.district) {
+        try {
+            coordinates = await getCoordinatesFromAddress(
+                formData.location.city,
+                formData.location.district,
+                formData.location.neighborhood || ''
+            );
+        } catch (error) {
+            console.error("Koordinat alınamadı:", error);
+        }
+    }
+
     // Mock API Call Simulation
     setTimeout(() => {
       const newVehicle: Vehicle = {
@@ -99,6 +114,7 @@ export const useVehicleForm = () => {
         images: images,
         features: features,
         expertise: expertiseReport,
+        coordinates: coordinates, // Koordinatları ekle
         // Sayısal değerleri garantiye al
         year: Number(formData.year),
         price: Number(formData.price),
@@ -110,7 +126,7 @@ export const useVehicleForm = () => {
 
       dispatch(addVehicle(newVehicle));
       setIsSubmitting(false);
-      navigate('/inventory');
+      navigate('/consignment'); // Ekleme sonrası direkt haritaya yönlendir
     }, 800);
   };
 
