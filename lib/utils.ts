@@ -55,3 +55,21 @@ export async function urlToBase64(url: string): Promise<string> {
     return ""; // Return empty string on failure
   }
 }
+
+// [YENİ] Türkçe Sayı Formatlama (Örn: 1000 -> 1.000)
+export function formatTurkishNumber(value: number | string | undefined | null): string {
+  if (value === undefined || value === null || value === '') return '';
+  // Eğer string gelirse önce sayıya çevir
+  const num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return '';
+  return new Intl.NumberFormat('tr-TR').format(num);
+}
+
+// [YENİ] Türkçe Formatlı Stringi Sayıya Çevirme (Örn: 1.000 -> 1000)
+export function parseTurkishNumber(value: string): number | string {
+  if (!value) return '';
+  // Noktaları kaldır, sadece rakamları bırak
+  const cleanValue = value.replace(/\./g, '');
+  const num = Number(cleanValue);
+  return isNaN(num) ? '' : num;
+}

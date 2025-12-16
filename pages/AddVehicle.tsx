@@ -7,13 +7,13 @@ import { FEATURE_GROUPS } from '../constants';
 import { 
     ChevronRight, Upload, ChevronLeft, Check, MapPin, Eye, 
     Crosshair, Zap, Bike, Box, Truck, Anchor, Plane, Accessibility, Car,
-    LayoutGrid, Wrench, ArrowRight, X
+    LayoutGrid, Wrench, ArrowRight, X, Calendar, Gauge, Palette
 } from 'lucide-react';
 import { 
   Button, Input, FormLabel, Combobox, Select, Drawer, Switch, Tooltip
 } from '../components/ui/UIComponents';
 import CarDamageSelector from '../components/CarDamageSelector';
-import { cn } from '../lib/utils';
+import { cn, formatTurkishNumber, parseTurkishNumber } from '../lib/utils';
 import { getCities, getTowns, getNeighborhoods } from '../data/locations';
 import VehicleImportWizard from '../components/VehicleImportWizard';
 
@@ -72,45 +72,97 @@ const AddVehicle: React.FC = () => {
       setStage('form');
   };
 
+  // Sayısal input değişimi (Maskeleme mantığı)
+  const handleNumericChange = (field: string, value: string) => {
+      // Sadece rakamları al
+      const numericValue = parseTurkishNumber(value);
+      updateField(field, numericValue);
+  };
+
   // --- RENDER HELPERS ---
-  const LivePreviewCard = () => (
-    <div className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl">
-        <h3 className="text-lg font-bold mb-1">Canlı Önizleme</h3>
-        <p className="text-slate-400 text-xs mb-6">İlan vitrinde böyle görünecek.</p>
-        
-        <div className="bg-white text-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-800">
-            <div className="h-48 bg-slate-100 relative group">
-                {images.length > 0 ? (
-                    <img src={images[0]} className="w-full h-full object-cover" />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
-                        <Upload size={32} />
-                    </div>
-                )}
-                {images.length > 1 && (
-                     <div className="absolute bottom-3 left-3 bg-black/50 text-white px-2 py-1 rounded-lg text-[10px] font-bold backdrop-blur-sm">
-                         +{images.length - 1} Foto
-                     </div>
-                )}
+  const LivePreviewCard = () => {
+    // Format helpers - formatTurkishNumber utilini kullanıyoruz
+    const formatPrice = (price?: number) => price ? `₺${formatTurkishNumber(price)}` : '700.000 TL';
+    const formatKM = (km?: number) => km ? `${formatTurkishNumber(km)}` : '412.000';
+
+    return (
+        <div className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl sticky top-6">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold">Canlı Önizleme</h3>
+                <span className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-300">Taslak</span>
             </div>
-            <div className="p-4">
-                <h4 className="font-bold text-lg leading-tight mb-1 truncate text-slate-900">
-                    {formData.title || 'İlan Başlığı'}
-                </h4>
-                <div className="flex items-center text-xs text-slate-500 mb-3 truncate">
-                    <MapPin size={12} className="mr-1" />
-                    {formData.location?.city || 'İl'} / {formData.location?.district || 'İlçe'}
+            
+            <div className="bg-white text-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-800">
+                {/* Image Area */}
+                <div className="h-56 bg-slate-100 relative group">
+                    {images.length > 0 ? (
+                        <img src={images[0]} className="w-full h-full object-cover" alt="Araç önizleme" />
+                    ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
+                            <Upload size={32} className="mb-2 opacity-50" />
+                            <span className="text-xs font-medium">Görsel Yok</span>
+                        </div>
+                    )}
+                    {images.length > 1 && (
+                         <div className="absolute bottom-3 right-3 bg-black/60 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold backdrop-blur-sm flex items-center">
+                             <Eye size={12} className="mr-1"/> +{images.length - 1}
+                         </div>
+                    )}
+                    <div className="absolute top-3 left-3 bg-emerald-500 text-white px-2 py-1 rounded-md text-[10px] font-bold shadow-sm">
+                        {formData.status || 'Satılık'}
+                    </div>
                 </div>
-                
-                <div className="flex justify-between items-end border-t border-slate-100 pt-3">
-                    <div className="text-emerald-600 font-bold text-xl">
-                        {formData.price ? `₺${formData.price}` : 'Fiyat Belirtilmedi'}
+
+                {/* Content Area */}
+                <div className="p-5">
+                    {/* Title */}
+                    <h4 className="font-extrabold text-lg leading-snug mb-2 text-slate-900 line-clamp-2">
+                        {formData.title || 'HASTASINA BORNİT'}
+                    </h4>
+
+                    {/* Location */}
+                    <div className="flex items-center text-xs text-slate-500 mb-4 pb-4 border-b border-slate-100">
+                        <MapPin size={14} className="mr-1.5 text-slate-400" />
+                        <span className="font-medium">
+                            {formData.location?.city || 'Eskişehir'} 
+                            <span className="mx-1 text-slate-300">/</span> 
+                            {formData.location?.district || 'Odunpazarı'}
+                        </span>
+                    </div>
+                    
+                    {/* Specs Grid */}
+                    <div className="grid grid-cols-3 gap-2 mb-5">
+                        <div className="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-100">
+                            <Calendar size={14} className="text-slate-400 mb-1" />
+                            <span className="text-xs font-bold text-slate-700">{formData.year || '1994'}</span>
+                            <span className="text-[9px] text-slate-400">Yıl</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-100">
+                            <Gauge size={14} className="text-slate-400 mb-1" />
+                            <span className="text-xs font-bold text-slate-700">{formatKM(formData.mileage)}</span>
+                            <span className="text-[9px] text-slate-400">KM</span>
+                        </div>
+                        <div className="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-100">
+                            <Palette size={14} className="text-slate-400 mb-1" />
+                            <span className="text-xs font-bold text-slate-700 truncate w-full text-center">{formData.color || 'Mor'}</span>
+                            <span className="text-[9px] text-slate-400">Renk</span>
+                        </div>
+                    </div>
+                    
+                    {/* Price & Action */}
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <span className="block text-[10px] text-slate-400 font-medium mb-0.5">Satış Fiyatı</span>
+                            <div className="text-2xl font-black text-emerald-600 tracking-tight">
+                                {formatPrice(formData.price)}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-  );
+    );
+  };
 
   if (stage === 'category') {
       return (
@@ -206,9 +258,19 @@ const AddVehicle: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                          <div>
                             <FormLabel tooltip="Aracın göstergesindeki güncel kilometre bilgisi.">Kilometre</FormLabel>
-                            <div className="relative"><Input name="mileage" value={formData.mileage} onChange={(e) => updateField('mileage', e.target.value)} className="pr-10" error={errors.mileage} /><span className="absolute right-3 top-4 text-xs font-bold text-slate-400">KM</span></div>
+                            <div className="relative">
+                                {/* KM Input Maskeleme */}
+                                <Input 
+                                    name="mileage" 
+                                    value={formatTurkishNumber(formData.mileage)} 
+                                    onChange={(e) => handleNumericChange('mileage', e.target.value)} 
+                                    className="pr-10" 
+                                    error={errors.mileage} 
+                                />
+                                <span className="absolute right-3 top-4 text-xs font-bold text-slate-400">KM</span>
+                            </div>
                          </div>
-                         <div><FormLabel tooltip="Aracın dış rengi.">Renk</FormLabel><Combobox options={['Beyaz', 'Siyah', 'Gri', 'Gümüş Gri', 'Kırmızı', 'Mavi', 'Lacivert', 'Yeşil', 'Kahverengi', 'Bej', 'Turuncu', 'Sarı']} value={formData.color!} onChange={(val) => updateField('color', val)} error={errors.color} /></div>
+                         <div><FormLabel tooltip="Aracın dış rengi.">Renk</FormLabel><Combobox options={['Beyaz', 'Siyah', 'Gri', 'Gümüş Gri', 'Kırmızı', 'Mavi', 'Lacivert', 'Yeşil', 'Kahverengi', 'Bej', 'Turuncu', 'Sarı', 'Mor', 'Bordo', 'Füme']} value={formData.color!} onChange={(val) => updateField('color', val)} error={errors.color} /></div>
                          <div><FormLabel tooltip="Aracı satan kişinin unvanı.">Kimden</FormLabel><Select options={[{value: 'Galeriden', label: 'Galeriden'}, {value: 'Sahibinden', label: 'Sahibinden'}, {value: 'Yetkili Bayiden', label: 'Yetkili Bayiden'}]} value={formData.fromWho!} onChange={(val) => updateField('fromWho', val)} /></div>
                     </div>
                   </div>
@@ -346,11 +408,31 @@ const AddVehicle: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <FormLabel tooltip="Son kullanıcıya sunulacak satış fiyatı.">Satış Fiyatı</FormLabel>
-                                <div className="relative"><Input name="price" value={formData.price} onChange={(e) => updateField('price', e.target.value)} className="pr-12 text-lg font-bold" error={errors.price} /><span className="absolute right-4 top-4 text-sm font-bold text-slate-400">TL</span></div>
+                                <div className="relative">
+                                    {/* Fiyat Input Maskeleme */}
+                                    <Input 
+                                        name="price" 
+                                        value={formatTurkishNumber(formData.price)} 
+                                        onChange={(e) => handleNumericChange('price', e.target.value)} 
+                                        className="pr-12 text-lg font-bold" 
+                                        error={errors.price} 
+                                    />
+                                    <span className="absolute right-4 top-4 text-sm font-bold text-slate-400">TL</span>
+                                </div>
                             </div>
                             <div>
                                 <FormLabel tooltip="Sadece B2B ağındaki diğer galericilerin görebileceği, esnafa özel dip fiyat.">B2B (Esnaf) Fiyatı</FormLabel>
-                                <div className="relative"><Input name="b2bPrice" value={formData.b2bPrice} onChange={(e) => updateField('b2bPrice', e.target.value)} className="bg-indigo-50/50 border-indigo-100 text-indigo-900 pr-12" placeholder="Opsiyonel" /><span className="absolute right-4 top-4 text-sm font-bold text-indigo-300">TL</span></div>
+                                <div className="relative">
+                                    {/* B2B Fiyat Input Maskeleme */}
+                                    <Input 
+                                        name="b2bPrice" 
+                                        value={formatTurkishNumber(formData.b2bPrice)} 
+                                        onChange={(e) => handleNumericChange('b2bPrice', e.target.value)} 
+                                        className="bg-indigo-50/50 border-indigo-100 text-indigo-900 pr-12" 
+                                        placeholder="Opsiyonel" 
+                                    />
+                                    <span className="absolute right-4 top-4 text-sm font-bold text-indigo-300">TL</span>
+                                </div>
                             </div>
                         </div>
 
