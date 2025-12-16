@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>OtoVizyon Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- Onest Font Import -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+      :root {
+        --font-sans: 'Onest', sans-serif;
+      }
+      body { 
+        font-family: var(--font-sans); 
+        background-color: #F3F4F6; /* Soft Gray Background */
+        color: #0F172A;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* Premium Soft Scrollbar */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #CBD5E1; }
+      
+      /* Mobile Optimizations */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      .leaflet-container { width: 100%; height: 100%; z-index: 0; border-radius: 1.5rem; }
+      
+      /* Animations */
+      .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      
+      /* Premium Shadow Utility */
+      .shadow-premium { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05); }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Onest', 'sans-serif'],
+            },
+            colors: {
+              primary: { DEFAULT: "#111827", foreground: "#FFFFFF" }, /* Deep Black/Blue like premium apps */
+              secondary: { DEFAULT: "#F1F5F9", foreground: "#0F172A" },
+              accent: { DEFAULT: "#3B82F6", foreground: "#FFFFFF" }, /* Trustworthy Blue */
+              muted: { DEFAULT: "#F8FAFC", foreground: "#64748B" },
+            },
+            borderRadius: {
+              'xl': '1rem',
+              '2xl': '1.25rem',
+              '3xl': '1.5rem',
+              '4xl': '2rem',
+            }
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "recharts": "https://esm.sh/recharts@2.12.0?deps=react@18.2.0,react-dom@18.2.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0?deps=react@18.2.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.1?deps=react@18.2.0,react-dom@18.2.0",
+    "leaflet": "https://esm.sh/leaflet@1.9.4",
+    "@reduxjs/toolkit": "https://esm.sh/@reduxjs/toolkit@2.2.1",
+    "react-redux": "https://esm.sh/react-redux@9.1.0?deps=react@18.2.0,react-dom@18.2.0",
+    "clsx": "https://esm.sh/clsx@2.1.0",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@2.2.1",
+    "@radix-ui/react-tooltip": "https://esm.sh/@radix-ui/react-tooltip@1.0.7?deps=react@18.2.0,react-dom@18.2.0",
+    "uuid": "https://esm.sh/uuid@^13.0.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.33.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
