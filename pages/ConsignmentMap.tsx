@@ -109,6 +109,7 @@ const ConsignmentMap: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
+  const radiusCircleRef = useRef<L.Circle | null>(null); // [YENİ] Yarıçap dairesi referansı
   const navigate = useNavigate();
   
   // State
@@ -161,7 +162,10 @@ const ConsignmentMap: React.FC = () => {
           });
 
       if (userLocation) {
-          vehicles = vehicles.filter(v => v.distance <= (searchRadius / 1000));
+          // "Tümü" (500km) seçili değilse filtrele
+          if (searchRadius < 500000) {
+              vehicles = vehicles.filter(v => v.distance <= (searchRadius / 1000));
+          }
       }
 
       vehicles.sort((a, b) => {
@@ -176,30 +180,29 @@ const ConsignmentMap: React.FC = () => {
 
   // --- 2. Harita Başlatma ve Resize Fix ---
   useEffect(() => {
+    // Harita zaten varsa tekrar başlatma (Strict Mode koruması)
+    if (mapInstance.current) return;
     if (!mapRef.current) return;
-    
-    // Harita zaten varsa sadece resize kontrolü yap
-    if (mapInstance.current) {
-        mapInstance.current.invalidateSize();
-        return;
-    }
 
     const defaultCenter: [number, number] = [41.0082, 28.9784]; 
 
-    mapInstance.current = L.map(mapRef.current, {
+    // Haritayı oluştur
+    const map = L.map(mapRef.current, {
         zoomControl: false,
         attributionControl: false
     }).setView(defaultCenter, 10);
 
+    mapInstance.current = map;
+
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       maxZoom: 19
-    }).addTo(mapInstance.current);
+    }).addTo(map);
 
-    markersRef.current = L.layerGroup().addTo(mapInstance.current);
+    markersRef.current = L.layerGroup().addTo(map);
 
     // [KRİTİK] Harita konteyner boyutu değiştiğinde render'ı düzelt
     const resizeObserver = new ResizeObserver(() => {
-        mapInstance.current?.invalidateSize();
+        map.invalidateSize();
     });
     resizeObserver.observe(mapRef.current);
 
@@ -210,20 +213,28 @@ const ConsignmentMap: React.FC = () => {
                 const { latitude, longitude } = position.coords;
                 setUserLocation({ lat: latitude, lng: longitude });
                 setLocationStatus('success');
-                mapInstance.current?.setView([latitude, longitude], 11);
-
-                const userHtml = `<div class="relative flex items-center justify-center w-6 h-6">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-4 w-4 bg-blue-600 border-2 border-white shadow-sm"></span>
-                </div>`;
                 
-                const userIcon = L.divIcon({
-                    className: 'bg-transparent',
-                    html: userHtml,
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
-                });
-                L.marker([latitude, longitude], { icon: userIcon, zIndexOffset: 1000 }).addTo(mapInstance.current!);
+                if (mapInstance.current) {
+                    mapInstance.current.setView([latitude, longitude], 11);
+                    
+                    // [FIX] Gri harita sorununu çözmek için render tetikle
+                    setTimeout(() => {
+                        mapInstance.current?.invalidateSize();
+                    }, 250);
+
+                    const userHtml = `<div class="relative flex items-center justify-center w-6 h-6">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-4 w-4 bg-blue-600 border-2 border-white shadow-sm"></span>
+                    </div>`;
+                    
+                    const userIcon = L.divIcon({
+                        className: 'bg-transparent',
+                        html: userHtml,
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                    });
+                    L.marker([latitude, longitude], { icon: userIcon, zIndexOffset: 1000 }).addTo(mapInstance.current!);
+                }
             },
             (error) => {
                 console.error("Konum hatası:", error);
@@ -234,12 +245,53 @@ const ConsignmentMap: React.FC = () => {
         setLocationStatus('error');
     }
 
+    // Cleanup Function
     return () => {
         resizeObserver.disconnect();
+        if (mapInstance.current) {
+            mapInstance.current.remove();
+            mapInstance.current = null;
+        }
     };
   }, []);
 
-  // --- 3. Marker Güncelleme ---
+  // --- [YENİ] 3. Yarıçap Dairesi ve Zoom Yönetimi ---
+  useEffect(() => {
+      if (!mapInstance.current || !userLocation) return;
+
+      // Varsa eski daireyi sil
+      if (radiusCircleRef.current) {
+          radiusCircleRef.current.remove();
+          radiusCircleRef.current = null;
+      }
+
+      // "Tümü" seçili değilse daire çiz
+      if (searchRadius < 500000) {
+          radiusCircleRef.current = L.circle([userLocation.lat, userLocation.lng], {
+              color: '#2563eb', // blue-600
+              fillColor: '#3b82f6', // blue-500
+              fillOpacity: 0.08,
+              weight: 1,
+              radius: searchRadius
+          }).addTo(mapInstance.current);
+
+          // Haritayı daireye sığdır (biraz padding ile)
+          mapInstance.current.fitBounds(radiusCircleRef.current.getBounds(), {
+              padding: [20, 20],
+              animate: true,
+              duration: 1
+          });
+      } else {
+          // "Tümü" seçiliyse haritayı genel Türkiye görünümüne çek
+          mapInstance.current.setView([39.0, 35.0], 6, {
+              animate: true,
+              duration: 1
+          });
+      }
+
+  }, [searchRadius, userLocation]);
+
+  // --- 4. Marker Güncelleme ---
   useEffect(() => {
       if (!mapInstance.current || !markersRef.current) return;
 
