@@ -97,13 +97,25 @@ const VehicleImportWizard: React.FC<VehicleImportWizardProps> = ({ onDataReceive
     const handleImportClick = () => {
         if (!selectedPlatformId) return;
         
+        // Eklenti/Mobil Kontrolü
         if (!isMobile && !extensionDetected) {
             setShowExtensionModal(true);
             return;
         }
         
         if (importLink) {
-            startImport(importLink, selectedPlatformId);
+            // [KRİTİK GÜNCELLEME]: Desktop ve Eklenti senaryosu için özel akış
+            if (!isMobile && !isReactNative) {
+                // Linkin sonuna parametre ekle (Eklenti bunu dinleyip otomatik tetiklenecek)
+                const separator = importLink.includes('?') ? '&' : '?';
+                const targetUrl = `${importLink}${separator}onClick=auto`;
+                
+                // Mevcut sekmede yönlendir
+                window.location.href = targetUrl;
+            } else {
+                // Mobil veya diğer senaryolar için varsayılan akış (Pull method)
+                startImport(importLink, selectedPlatformId);
+            }
         }
     };
 
