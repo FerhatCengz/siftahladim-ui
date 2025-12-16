@@ -82,8 +82,9 @@ const AddVehicle: React.FC = () => {
   // --- RENDER HELPERS ---
   const LivePreviewCard = () => {
     // Format helpers - formatTurkishNumber utilini kullanıyoruz
-    const formatPrice = (price?: number) => price ? `₺${formatTurkishNumber(price)}` : '700.000 TL';
-    const formatKM = (km?: number) => km ? `${formatTurkishNumber(km)}` : '412.000';
+    // Veri yoksa "-" veya genel ifade döndür
+    const formatPrice = (price?: number) => price ? `₺${formatTurkishNumber(price)}` : 'Fiyat Giriniz';
+    const formatKM = (km?: number) => km ? `${formatTurkishNumber(km)}` : '-';
 
     return (
         <div className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl sticky top-6">
@@ -116,17 +117,20 @@ const AddVehicle: React.FC = () => {
                 {/* Content Area */}
                 <div className="p-5">
                     {/* Title */}
-                    <h4 className="font-extrabold text-lg leading-snug mb-2 text-slate-900 line-clamp-2">
-                        {formData.title || 'HASTASINA BORNİT'}
+                    <h4 className={cn(
+                        "font-extrabold text-lg leading-snug mb-2 line-clamp-2",
+                        formData.title ? "text-slate-900" : "text-slate-300 font-medium italic"
+                    )}>
+                        {formData.title || 'İlan Başlığı'}
                     </h4>
 
                     {/* Location */}
                     <div className="flex items-center text-xs text-slate-500 mb-4 pb-4 border-b border-slate-100">
                         <MapPin size={14} className="mr-1.5 text-slate-400" />
                         <span className="font-medium">
-                            {formData.location?.city || 'Eskişehir'} 
+                            {formData.location?.city || 'İl'} 
                             <span className="mx-1 text-slate-300">/</span> 
-                            {formData.location?.district || 'Odunpazarı'}
+                            {formData.location?.district || 'İlçe'}
                         </span>
                     </div>
                     
@@ -134,17 +138,23 @@ const AddVehicle: React.FC = () => {
                     <div className="grid grid-cols-3 gap-2 mb-5">
                         <div className="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-100">
                             <Calendar size={14} className="text-slate-400 mb-1" />
-                            <span className="text-xs font-bold text-slate-700">{formData.year || '1994'}</span>
+                            <span className={cn("text-xs font-bold", formData.year ? "text-slate-700" : "text-slate-300")}>
+                                {formData.year || '-'}
+                            </span>
                             <span className="text-[9px] text-slate-400">Yıl</span>
                         </div>
                         <div className="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-100">
                             <Gauge size={14} className="text-slate-400 mb-1" />
-                            <span className="text-xs font-bold text-slate-700">{formatKM(formData.mileage)}</span>
+                            <span className={cn("text-xs font-bold", formData.mileage ? "text-slate-700" : "text-slate-300")}>
+                                {formatKM(formData.mileage)}
+                            </span>
                             <span className="text-[9px] text-slate-400">KM</span>
                         </div>
                         <div className="flex flex-col items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-100">
                             <Palette size={14} className="text-slate-400 mb-1" />
-                            <span className="text-xs font-bold text-slate-700 truncate w-full text-center">{formData.color || 'Mor'}</span>
+                            <span className={cn("text-xs font-bold truncate w-full text-center", formData.color ? "text-slate-700" : "text-slate-300")}>
+                                {formData.color || '-'}
+                            </span>
                             <span className="text-[9px] text-slate-400">Renk</span>
                         </div>
                     </div>
@@ -153,7 +163,7 @@ const AddVehicle: React.FC = () => {
                     <div className="flex justify-between items-center">
                         <div>
                             <span className="block text-[10px] text-slate-400 font-medium mb-0.5">Satış Fiyatı</span>
-                            <div className="text-2xl font-black text-emerald-600 tracking-tight">
+                            <div className={cn("text-2xl font-black tracking-tight", formData.price ? "text-emerald-600" : "text-slate-300 text-lg")}>
                                 {formatPrice(formData.price)}
                             </div>
                         </div>
