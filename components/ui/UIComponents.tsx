@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { cn, turkishToLower } from "../../lib/utils";
-import { ChevronDown, Check, HelpCircle, X, AlertCircle } from "lucide-react";
+import { ChevronDown, Check, HelpCircle, X, AlertCircle, Info } from "lucide-react";
 
 // --- Button ---
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -151,21 +151,60 @@ export const Drawer = ({ isOpen, onClose, title, children }: { isOpen: boolean; 
   return createPortal(portalContent, document.body);
 };
 
-// --- Tooltip ---
-export const Tooltip = ({ text, children }: { text: string, children?: React.ReactNode }) => {
+// --- Advanced Tooltip ---
+interface TooltipProps {
+  content: React.ReactNode;
+  children?: React.ReactNode;
+  position?: "top" | "bottom" | "left" | "right";
+  className?: string;
+  delay?: number;
+}
+
+export const Tooltip = ({ content, children, position = "top", className, delay = 200 }: TooltipProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  const timeoutRef = useRef<any>(null);
+
+  const showTooltip = () => {
+    timeoutRef.current = setTimeout(() => setIsVisible(true), delay);
+  };
+
+  const hideTooltip = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsVisible(false);
+  };
+
+  // Position classes
+  const positionClasses = {
+    top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
+    bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
+    left: "right-full top-1/2 -translate-y-1/2 mr-2",
+    right: "left-full top-1/2 -translate-y-1/2 ml-2",
+  };
+
+  const arrowClasses = {
+    top: "top-full left-1/2 -translate-x-1/2 border-t-slate-900 border-x-transparent border-b-transparent",
+    bottom: "bottom-full left-1/2 -translate-x-1/2 border-b-slate-900 border-x-transparent border-t-transparent",
+    left: "left-full top-1/2 -translate-y-1/2 border-l-slate-900 border-y-transparent border-r-transparent",
+    right: "right-full top-1/2 -translate-y-1/2 border-r-slate-900 border-y-transparent border-l-transparent",
+  };
 
   return (
-    <div className="relative inline-flex items-center ml-1.5 align-middle" 
-         onMouseEnter={() => setIsVisible(true)} 
-         onMouseLeave={() => setIsVisible(false)}
+    <div className="relative inline-flex items-center align-middle" 
+         onMouseEnter={showTooltip} 
+         onMouseLeave={hideTooltip}
          onClick={() => setIsVisible(!isVisible)}
     >
-      {children}
+      {children ? children : <HelpCircle size={15} className="text-slate-400 hover:text-blue-600 cursor-help transition-colors" />}
+      
       {isVisible && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-[220px] p-3 bg-slate-800 text-white text-[11px] font-medium rounded-xl shadow-xl z-50 animate-in fade-in zoom-in-95 duration-200 text-center leading-relaxed tracking-wide pointer-events-none">
-          {text}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+        <div className={cn(
+            "absolute z-[100] w-max max-w-[240px] px-3 py-2 bg-slate-900 text-white text-xs font-medium rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 text-center leading-relaxed tracking-wide pointer-events-none",
+            positionClasses[position],
+            className
+        )}>
+          {content}
+          {/* Arrow */}
+          <div className={cn("absolute border-4", arrowClasses[position])}></div>
         </div>
       )}
     </div>
@@ -173,15 +212,15 @@ export const Tooltip = ({ text, children }: { text: string, children?: React.Rea
 };
 
 // --- Form Label ---
-export const FormLabel = ({ children, tooltip, className }: { children?: React.ReactNode, tooltip?: string, className?: string }) => (
+export const FormLabel = ({ children, tooltip, className }: { children?: React.ReactNode, tooltip?: string | React.ReactNode, className?: string }) => (
   <div className={cn("flex items-center mb-2.5 select-none", className)}>
     <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">
       {children}
     </label>
     {tooltip && (
-        <Tooltip text={tooltip}>
-           <HelpCircle size={15} className="text-slate-300 hover:text-slate-900 cursor-help transition-colors" />
-        </Tooltip>
+        <div className="ml-1.5">
+            <Tooltip content={tooltip} />
+        </div>
     )}
   </div>
 );

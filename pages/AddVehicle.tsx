@@ -10,7 +10,7 @@ import {
     LayoutGrid, Wrench, ArrowRight, X
 } from 'lucide-react';
 import { 
-  Button, Input, FormLabel, Combobox, Select, Drawer, Switch
+  Button, Input, FormLabel, Combobox, Select, Drawer, Switch, Tooltip
 } from '../components/ui/UIComponents';
 import CarDamageSelector from '../components/CarDamageSelector';
 import { cn } from '../lib/utils';
@@ -180,36 +180,36 @@ const AddVehicle: React.FC = () => {
                 {step === 1 && (
                   <div className="animate-in fade-in slide-in-from-left-4 duration-300 space-y-8">
                     <div>
-                        <FormLabel className="text-sm">İlan Başlığı</FormLabel>
+                        <FormLabel className="text-sm" tooltip="İlanınızın vitrinde görünecek kısa ve çarpıcı başlığı. Örn: 'Hatasız Boyasız 2023 Model'.">İlan Başlığı</FormLabel>
                         <Input name="title" value={formData.title} onChange={(e) => updateField('title', e.target.value)} placeholder="Örn: HATASIZ BOYASIZ..." className="font-bold" maxLength={60} error={errors.title} />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <FormLabel>Yıl</FormLabel>
+                            <FormLabel tooltip="Aracın ruhsatta yazan model yılı.">Yıl</FormLabel>
                             <Select options={yearOptions} value={formData.year!} onChange={(val) => updateField('year', val)} />
                         </div>
                         <div>
-                            <FormLabel>Marka</FormLabel>
+                            <FormLabel tooltip="Aracın üretici markası. Listede yoksa yazarak ekleyebilirsiniz.">Marka</FormLabel>
                             <Combobox options={config.brands} value={formData.brand!} onChange={(val) => updateField('brand', val)} onCreate={(val) => dispatch(addBrand(val))} error={errors.brand} />
                         </div>
                         <div>
-                            <FormLabel>Model</FormLabel>
+                            <FormLabel tooltip="Seçilen markaya ait model.">Model</FormLabel>
                             <Combobox options={config.models} value={formData.model!} onChange={(val) => updateField('model', val)} onCreate={(val) => dispatch(addModel(val))} error={errors.model} />
                         </div>
                         <div>
-                            <FormLabel>Seri / Paket</FormLabel>
+                            <FormLabel tooltip="Aracın donanım paketi veya serisi.">Seri / Paket</FormLabel>
                             <Combobox options={config.packages} value={formData.series!} onChange={(val) => updateField('series', val)} onCreate={(val) => dispatch(addPackage(val))} error={errors.series} />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                          <div>
-                            <FormLabel>Kilometre</FormLabel>
+                            <FormLabel tooltip="Aracın göstergesindeki güncel kilometre bilgisi.">Kilometre</FormLabel>
                             <div className="relative"><Input name="mileage" value={formData.mileage} onChange={(e) => updateField('mileage', e.target.value)} className="pr-10" error={errors.mileage} /><span className="absolute right-3 top-4 text-xs font-bold text-slate-400">KM</span></div>
                          </div>
-                         <div><FormLabel>Renk</FormLabel><Combobox options={['Beyaz', 'Siyah', 'Gri', 'Gümüş Gri', 'Kırmızı', 'Mavi', 'Lacivert', 'Yeşil', 'Kahverengi', 'Bej', 'Turuncu', 'Sarı']} value={formData.color!} onChange={(val) => updateField('color', val)} error={errors.color} /></div>
-                         <div><FormLabel>Kimden</FormLabel><Select options={[{value: 'Galeriden', label: 'Galeriden'}, {value: 'Sahibinden', label: 'Sahibinden'}, {value: 'Yetkili Bayiden', label: 'Yetkili Bayiden'}]} value={formData.fromWho!} onChange={(val) => updateField('fromWho', val)} /></div>
+                         <div><FormLabel tooltip="Aracın dış rengi.">Renk</FormLabel><Combobox options={['Beyaz', 'Siyah', 'Gri', 'Gümüş Gri', 'Kırmızı', 'Mavi', 'Lacivert', 'Yeşil', 'Kahverengi', 'Bej', 'Turuncu', 'Sarı']} value={formData.color!} onChange={(val) => updateField('color', val)} error={errors.color} /></div>
+                         <div><FormLabel tooltip="Aracı satan kişinin unvanı.">Kimden</FormLabel><Select options={[{value: 'Galeriden', label: 'Galeriden'}, {value: 'Sahibinden', label: 'Sahibinden'}, {value: 'Yetkili Bayiden', label: 'Yetkili Bayiden'}]} value={formData.fromWho!} onChange={(val) => updateField('fromWho', val)} /></div>
                     </div>
                   </div>
                 )}
@@ -219,27 +219,27 @@ const AddVehicle: React.FC = () => {
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <FormLabel>Kasa Tipi</FormLabel>
+                                <FormLabel tooltip="Aracın gövde tipi (Sedan, Hatchback, SUV vb.).">Kasa Tipi</FormLabel>
                                 <Combobox options={['Sedan', 'Hatchback', 'Station Wagon', 'SUV', 'Coupe', 'Cabrio', 'MPV']} value={formData.bodyType!} onChange={(val) => updateField('bodyType', val)} error={errors.bodyType} />
                             </div>
                             <div>
-                                <FormLabel>Çekiş</FormLabel>
+                                <FormLabel tooltip="Aracın çekiş sistemi (Önden, Arkadan, 4x4).">Çekiş</FormLabel>
                                 <Select options={[{value: 'Önden Çekiş', label: 'Önden'}, {value: 'Arkadan İtiş', label: 'Arkadan'}, {value: '4x4', label: '4x4'}]} value={formData.traction!} onChange={(val) => updateField('traction', val)} error={errors.traction} />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
                             <div>
-                                <FormLabel>Motor Gücü</FormLabel>
+                                <FormLabel tooltip="Aracın motor gücü (Beygir Gücü).">Motor Gücü</FormLabel>
                                 <div className="relative"><Input name="enginePower" value={formData.enginePower} onChange={(e) => updateField('enginePower', e.target.value)} className="pr-10" placeholder="100" error={errors.enginePower} /><span className="absolute right-3 top-4 text-xs font-bold text-slate-400">HP</span></div>
                             </div>
                             <div>
-                                <FormLabel>Motor Hacmi</FormLabel>
+                                <FormLabel tooltip="Aracın motor hacmi (Silindir Hacmi).">Motor Hacmi</FormLabel>
                                 <div className="relative"><Input name="engineVolume" value={formData.engineVolume} onChange={(e) => updateField('engineVolume', e.target.value)} className="pr-10" placeholder="1600" error={errors.engineVolume} /><span className="absolute right-3 top-4 text-xs font-bold text-slate-400">CC</span></div>
                             </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div><FormLabel>Yakıt</FormLabel><div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200">{Object.values(FuelType).map((type) => (<button key={type} type="button" onClick={() => updateField('fuel', type)} className={cn("flex-1 py-2 text-[10px] font-bold rounded-lg transition-all", formData.fuel === type ? "bg-white text-slate-900 shadow-sm" : "text-slate-400")}>{type}</button>))}</div></div>
-                            <div><FormLabel>Vites</FormLabel><div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200">{Object.values(Transmission).map((type) => (<button key={type} type="button" onClick={() => updateField('transmission', type)} className={cn("flex-1 py-2 text-[10px] font-bold rounded-lg transition-all", formData.transmission === type ? "bg-white text-slate-900 shadow-sm" : "text-slate-400")}>{type}</button>))}</div></div>
+                            <div><FormLabel tooltip="Aracın kullandığı yakıt türü.">Yakıt</FormLabel><div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200">{Object.values(FuelType).map((type) => (<button key={type} type="button" onClick={() => updateField('fuel', type)} className={cn("flex-1 py-2 text-[10px] font-bold rounded-lg transition-all", formData.fuel === type ? "bg-white text-slate-900 shadow-sm" : "text-slate-400")}>{type}</button>))}</div></div>
+                            <div><FormLabel tooltip="Aracın vites tipi.">Vites</FormLabel><div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200">{Object.values(Transmission).map((type) => (<button key={type} type="button" onClick={() => updateField('transmission', type)} className={cn("flex-1 py-2 text-[10px] font-bold rounded-lg transition-all", formData.transmission === type ? "bg-white text-slate-900 shadow-sm" : "text-slate-400")}>{type}</button>))}</div></div>
                         </div>
                     </div>
                 )}
@@ -290,12 +290,17 @@ const AddVehicle: React.FC = () => {
                 {step === 4 && (
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-8">
                         <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100 flex flex-col items-center relative">
-                             <h3 className="text-sm font-bold text-slate-900 mb-4 w-full border-b border-slate-200 pb-2 flex items-center"><Wrench size={16} className="mr-2"/> Ekspertiz Durumu</h3>
+                             <h3 className="text-sm font-bold text-slate-900 mb-4 w-full border-b border-slate-200 pb-2 flex items-center">
+                                <Wrench size={16} className="mr-2"/> Ekspertiz Durumu
+                                <div className="ml-auto">
+                                    <FormLabel tooltip="Aracın parçalarının boya ve değişen durumunu işaretleyin. Yeşil: Orijinal, Sarı: Lokal, Turuncu: Boyalı, Kırmızı: Değişen." className="mb-0"><span className="sr-only">Bilgi</span></FormLabel>
+                                </div>
+                             </h3>
                              <CarDamageSelector value={expertiseReport} onChange={setExpertiseReport} />
                         </div>
 
                         <div>
-                             <FormLabel>Galeri ve Fotoğraflar</FormLabel>
+                             <FormLabel tooltip="Aracın fotoğraflarını buraya yükleyin. Sürükle bırak yaparak sıralamayı değiştirebilirsiniz. İlk fotoğraf vitrin fotoğrafı olacaktır.">Galeri ve Fotoğraflar</FormLabel>
                              <p className="text-xs text-slate-500 mb-4 -mt-2">Sürükleyerek sıralayabilirsiniz.</p>
                              
                              {images.length === 0 ? (
@@ -340,11 +345,11 @@ const AddVehicle: React.FC = () => {
                     <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-8">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
-                                <FormLabel>Satış Fiyatı</FormLabel>
+                                <FormLabel tooltip="Son kullanıcıya sunulacak satış fiyatı.">Satış Fiyatı</FormLabel>
                                 <div className="relative"><Input name="price" value={formData.price} onChange={(e) => updateField('price', e.target.value)} className="pr-12 text-lg font-bold" error={errors.price} /><span className="absolute right-4 top-4 text-sm font-bold text-slate-400">TL</span></div>
                             </div>
                             <div>
-                                <FormLabel>B2B (Esnaf) Fiyatı</FormLabel>
+                                <FormLabel tooltip="Sadece B2B ağındaki diğer galericilerin görebileceği, esnafa özel dip fiyat.">B2B (Esnaf) Fiyatı</FormLabel>
                                 <div className="relative"><Input name="b2bPrice" value={formData.b2bPrice} onChange={(e) => updateField('b2bPrice', e.target.value)} className="bg-indigo-50/50 border-indigo-100 text-indigo-900 pr-12" placeholder="Opsiyonel" /><span className="absolute right-4 top-4 text-sm font-bold text-indigo-300">TL</span></div>
                             </div>
                         </div>
@@ -353,7 +358,7 @@ const AddVehicle: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-6 rounded-3xl border border-slate-100">
                             <div className="flex items-center justify-between p-2">
                                 <div>
-                                    <h4 className="font-bold text-sm text-slate-900">Takas Olur</h4>
+                                    <h4 className="font-bold text-sm text-slate-900 flex items-center">Takas Olur <div className="ml-2"><Tooltip content="Müşterilerden gelecek takas tekliflerine açık olduğunuzu belirtir." /></div></h4>
                                     <p className="text-xs text-slate-500">Takas tekliflerini kabul et</p>
                                 </div>
                                 <Switch checked={!!formData.exchange} onCheckedChange={(v) => updateField('exchange', v)} />
@@ -361,7 +366,7 @@ const AddVehicle: React.FC = () => {
 
                             <div className="flex items-center justify-between p-2">
                                 <div>
-                                    <h4 className="font-bold text-sm text-slate-900">Garantili</h4>
+                                    <h4 className="font-bold text-sm text-slate-900 flex items-center">Garantili <div className="ml-2"><Tooltip content="Aracın üretici veya bayi garantisinin devam edip etmediği." /></div></h4>
                                     <p className="text-xs text-slate-500">Üretici/Bayi garantisi var</p>
                                 </div>
                                 <Switch checked={!!formData.warranty} onCheckedChange={(v) => updateField('warranty', v)} />
@@ -369,7 +374,7 @@ const AddVehicle: React.FC = () => {
 
                             <div className="flex items-center justify-between p-2">
                                 <div>
-                                    <h4 className="font-bold text-sm text-slate-900">Ağır Hasar Kayıtlı</h4>
+                                    <h4 className="font-bold text-sm text-slate-900 flex items-center">Ağır Hasar Kayıtlı <div className="ml-2"><Tooltip content="Aracın pert kaydı veya ağır hasar kaydı varsa işaretleyin." /></div></h4>
                                     <p className="text-xs text-slate-500">Pert kaydı var mı?</p>
                                 </div>
                                 <Switch 
@@ -381,7 +386,7 @@ const AddVehicle: React.FC = () => {
 
                             <div className="flex items-center justify-between p-2">
                                 <div>
-                                    <h4 className="font-bold text-sm text-indigo-900">Konsinye (B2B) Paylaş</h4>
+                                    <h4 className="font-bold text-sm text-indigo-900 flex items-center">Konsinye (B2B) Paylaş <div className="ml-2"><Tooltip content="Bu aracı B2B ağında diğer galericilerle paylaşarak daha hızlı satılmasını sağlar." /></div></h4>
                                     <p className="text-xs text-indigo-500">Diğer galericiler görsün</p>
                                 </div>
                                 <Switch 
@@ -398,15 +403,15 @@ const AddVehicle: React.FC = () => {
                              </div>
                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                  <div>
-                                     <FormLabel>İl</FormLabel>
+                                     <FormLabel tooltip="Aracın bulunduğu il.">İl</FormLabel>
                                      <Combobox options={cities} value={formData.location?.city!} onChange={(val) => updateField('location.city', val)} error={errors['location.city']} />
                                  </div>
                                  <div>
-                                     <FormLabel>İlçe</FormLabel>
+                                     <FormLabel tooltip="Aracın bulunduğu ilçe.">İlçe</FormLabel>
                                      <Combobox options={districts} value={formData.location?.district!} onChange={(val) => updateField('location.district', val)} error={errors['location.district']} />
                                  </div>
                                  <div>
-                                     <FormLabel>Mahalle</FormLabel>
+                                     <FormLabel tooltip="Aracın bulunduğu mahalle/semt.">Mahalle</FormLabel>
                                      <Combobox options={neighborhoods} value={formData.location?.neighborhood!} onChange={(val) => updateField('location.neighborhood', val)} error={errors['location.neighborhood']} />
                                  </div>
                              </div>
